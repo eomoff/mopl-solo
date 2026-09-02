@@ -28,7 +28,7 @@ Label: `wayfinder:map`
 
 **매 세션 참조 스킬**: `grilling`, `domain-modeling`. 모듈 경계·인터페이스를 다룰 땐 `codebase-design`.
 
-**트래커**: 로컬 마크다운. 이 디렉토리가 곧 트래커다.
+**트래커**: 로컬 마크다운. 이 디렉토리가 곧 트래커이며, **git으로 추적된다**(`origin`: https://github.com/eomoff/mopl-solo).
 
 ## Decisions so far
 
@@ -36,6 +36,7 @@ Label: `wayfinder:map`
 - [The Sports DB API 조사](issues/03-sportsdb-research.md): **증분 수집 수단이 없고**(`idEvent` upsert가 유일), 무료 키로는 배치 불가(전 세계 하루 3경기) — 실질 최소선 **$9/월**. 프론트 계약이 `type: movie|tvSeries|sport` 단일 `Content`를 이미 강제하지만 **날짜 필드가 없어** 경기 시작 시각을 놓을 자리가 없다. 429가 JSON이 아닌 Cloudflare 텍스트다. 문서가 실제와 어긋나 120회 실측으로 검증. 전문: [`research/sportsdb-api.md`](research/sportsdb-api.md)
 - [프론트엔드 계약 확보와 1.0.5 차이 확인](issues/01-frontend-contract.md): 계약 사본을 `contract/`에 커밋, 번들 원본은 `frontend/`(미추적), `dist/`는 `src/main/resources/static/`으로. **CORS·SPA 폴백 모두 불필요** — 프론트가 상대 경로를 쓰고 HashRouter라서. 경로 32 / 오퍼레이션 45 / 스키마 37. **`watchingsession`·`directmessage`에는 독립 쓰기 경로가 없고**, 소셜 로그인과 WebSocket/SSE 페이로드는 계약 밖이다.
 - [스포츠 콘텐츠를 목적지에 둘 것인가](issues/14-sports-scope.md): **(ㄴ) 무료 티어로 축소 포함.** 스포츠는 "타입이 여러 개인 콘텐츠 모델"이라는 설계 문제를 제공하는 선에서 존재하고, 배치의 학습 가치는 TMDB 규모에서 확보한다. 유료 구독 없음.
+- [GitHub 저장소 개설](issues/11-github-repo.md): **https://github.com/eomoff/mopl-solo** (public). 지도(`.scratch/`)를 **git으로 추적**하기로 하고 `.gitignore`에서 뺐다. `frontend/`·`.DS_Store` 무시 추가. `docs/`는 무시 유지 — `info.md`는 공개되지 않는다.
 
 ## Not yet specified
 

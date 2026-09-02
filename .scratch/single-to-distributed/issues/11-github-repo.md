@@ -1,7 +1,7 @@
 # GitHub 저장소 개설
 
 Type: task
-Status: open
+Status: resolved
 
 ## Question
 
@@ -12,3 +12,26 @@ Status: open
 - **`.gitignore` 점검** — 프론트엔드 zip 2개(`project-mopl-fe-1.0.5.zip`, `-release.zip`)가 저장소 루트에 그대로 있다. 압축 해제본과 로컬 설정까지 포함해 무엇을 커밋하고 무엇을 걸러낼지 정한다.
 
 이 티켓은 브랜치 전략·CI/CD 결정을 풀기 위해 존재한다.
+
+## Answer
+
+**https://github.com/eomoff/mopl-solo** — public. 초기 커밋 `34e55b0` 푸시 완료(파일 107개, 3.2MB).
+
+### 결정
+
+| 항목 | 결정 | 비고 |
+| --- | --- | --- |
+| 이름 | `mopl-solo` | `rootProject.name`(`mopl`)·패키지(`com.github.eomoff.mopl`)와 **의도적으로 다르다.** 저장소 이름만 연습본임을 드러내고 코드 안 이름은 건드리지 않는다. |
+| 공개 | public | 커버리지 배지가 쉬워지고 Actions 사용량 제한이 없다. 대신 코드잇 제공 프론트엔드 산출물이 함께 공개된다. |
+| 지도 추적 | **추적한다** | `.gitignore`에서 `.scratch`를 뺐다. 지도가 이 프로젝트의 유일한 설계 기록이라, 추적하지 않으면 12주 뒤 "왜 이렇게 만들었나"에 답할 근거가 사라진다. |
+
+### `.gitignore` 정리
+
+- `/frontend/` 추가 — 제공 번들 원본과 zip 2개는 추적하지 않는다(계약 사본은 `contract/`에 있다).
+- `.DS_Store` 추가.
+- `.scratch` 제거 — 위 결정에 따라.
+- **`docs/`는 여전히 무시된다** — 기존 `### 로컬 문서 ###` 규칙 그대로다. 즉 `docs/info.md`(코스 제공 요구사항)는 공개 저장소에 올라가지 않는다. 의도된 상태로 두었으나, 지도가 `info.md`를 자주 인용하므로 **저장소만 보는 사람은 그 출처를 확인할 수 없다**는 점은 남는다.
+
+### 확인된 사실
+
+`gh`가 `eomoff` 계정으로 인증되어 있고 토큰 스코프에 `repo`, `workflow`가 있다 → [브랜치 전략과 CI/CD 결정]에서 Actions 워크플로를 만들고 푸시하는 데 추가 권한이 필요 없다.

@@ -47,6 +47,7 @@ Label: `wayfinder:map`
 - [콘텐츠 수집 배치 설계](issues/09-batch.md): 백필은 TMDB **`popularity` 상위 3만 건**(전량 124만은 17시간이라 개발 반복이 불가능). Job은 **소스별 분리** + 유지보수 Job 하나. 오류는 **429/404/5xx 세 갈래**로 가르고 `Retry-After`를 따른다(SportsDB 429는 **평문**이라 상태코드 먼저 분기). 워터마크·묘비 테이블 추가, 한국어 폴백은 **수집 시점 적용**.
 - [로컬 개발·분산 환경 구성](issues/16-local-env.md): **이음매는 프로파일이 아니라 설정 프로퍼티(`mopl.<축>.mode`)로 가른다** — 프로파일이면 네 이음매가 동시에 바뀌어 무엇이 깨졌는지 알 수 없다. 1일차는 Postgres+Redis만, Kafka·Nginx·app×2는 Compose `distributed` 프로파일로. 평소엔 `bootRun` 단일, 전환 검증 때만 이미지 2개. 정적 파일은 분산에서도 앱이 서빙한다. `.gitignore`에 `.env` 추가(public 저장소).
 - [이음매를 감싸는 테스트 전략](issues/15-seam-tests.md): **깨짐을 실패가 아니라 통과로 표현한다** — "단일 모드에서는 전파되지 않는다"가 통과하는 테스트이고, 전환 시 이것이 실패로 바뀌는 것이 **전환 완료의 판정 기준**이 된다. 추상 계약 테스트 + 구현별 하위 클래스, 인스턴스 2대는 같은 JVM에 컨텍스트 2개(**단일 구현이 `static`이면 거짓 통과가 난다**). 인프라는 진짜, 외부 API는 가짜. `jacocoTestCoverageVerification`이 `check`에 미연결이다.
+- [브랜치 전략과 CI/CD 결정](issues/12-ci-cd.md): 기능 브랜치 + PR, **승인 요구 없이 필수 상태 검사만** (혼자인데 승인을 요구하면 매번 우회하게 된다). **이음매 전환마다 PR 하나** = 되돌릴 수 있는 단위. CI는 `./gradlew build` 하나로 시작해 전환 시점에 단일/분산 job으로 분리. 배지는 Gist + shields.io, 배포는 **`workflow_dispatch` 수동 + OIDC**(장기 키를 시크릿에 넣지 않는다). 80% 게이트는 처음부터 켜되 `dto`·`config`·`MoplApplication` 제외.
 
 ## Not yet specified
 

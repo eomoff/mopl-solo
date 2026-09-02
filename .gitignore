@@ -47,3 +47,8 @@ docs/
 
 ### macOS ###
 .DS_Store
+
+### 로컬 비밀 (환경변수 주입) ###
+.env
+.env.*
+!.env.example

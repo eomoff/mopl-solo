@@ -43,6 +43,7 @@ Label: `wayfinder:map`
 - [도메인 모델 확정](issues/05-domain-model.md): PK는 UUID·시간은 `date-time`(계약이 고정). **정렬 축인 계산 필드만 저장**(`averageRating`·`watcherCount`·`subscriberCount`), 조회자별 값(`subscribedByMe`·`hasUnread`)은 파생. 타입별 속성은 **부속 테이블**, 태그는 별도 테이블. `auth`는 엔티티 없이 시작. 계약 결함 3건은 글자 그대로 따르되 **DTO 경계에서만 매핑**한다. 용어집은 [`CONTEXT.md`](../../CONTEXT.md).
 - [실시간 WebSocket 아키텍처 설계](issues/07-realtime.md): **STOMP + SockJS**(`/ws`), 인증은 `CONNECT` 프레임 헤더. **클라이언트가 JOIN/LEAVE를 발행하지 않으므로 서버가 구독 이벤트에서 파생**한다. 시청 세션은 사용자 기준 + 참조 카운트. **DM 두 경로는 중복이 아니라 상보적** — 서버는 둘 다 보낸다. 대화 토픽은 `ChannelInterceptor`로 참여자 인가 검사(없으면 남의 DM이 새어나간다). *(에이전트 판단으로 확정)*
 - [알림·이벤트 파이프라인 설계](issues/08-notification.md): **읽음 처리가 곧 삭제**이고 알림에 타겟 링크가 없다(순수 텍스트). **시청 알림을 만들지 않기로 해 트리거가 6종→5종**으로 줄었다(요구사항의 의도적 축소). 팬아웃은 쓰기 시점, 발행은 `DomainEventPublisher` 단일 진입점 + `AFTER_COMMIT`. `ERROR` level은 쓰지 않는다.
+- [인증·인가와 토큰 무효화 설계](issues/06-auth.md): 액세스 토큰은 **메모리에만** 있고 `refresh`로 복구된다(재발급 트리거는 **401**). 리프레시 토큰을 **저장·회전**하고 **동시 로그인을 막는다**(액세스 15분/리프레시 14일). 즉시 반영은 **Redis 무효화 목록**(TTL=15분). CSRF는 형식이 아니다 — `refresh`·`sign-out`이 쿠키만으로 인증된다. **사용자 탈퇴는 구현하지 않는다.** `auth` 패키지에 리프레시 토큰·소셜 계정 연결 두 엔티티가 생겼다.
 
 ## Not yet specified
 

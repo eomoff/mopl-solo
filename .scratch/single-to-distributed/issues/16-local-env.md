@@ -12,3 +12,10 @@ Status: open
 - **로컬 분산 환경의 형태** — 전환을 실습하려면 인스턴스 2대 + Nginx가 필요하다. Docker Compose로 어떻게 구성할 것인가. 앱을 이미지로 말아서 2개 띄우는가, 포트만 다르게 2개 실행하는가.
 - **개발 중 프론트엔드** — `src/main/resources/static/`의 빌드 산출물로 볼 것인가, `pnpm dev`(프록시 설정 이미 있음)로 띄울 것인가. 분산 환경에서는 Nginx가 정적 파일을 서빙하는가 앱이 서빙하는가.
 - **애플리케이션 설정** — `application.yaml`이 사실상 비어 있다(`spring.application.name`뿐). 연결 정보와 비밀을 어떻게 주입할 것인가.
+
+---
+
+**[실시간 WebSocket 아키텍처 설계]가 넘긴 것**
+
+- **Nginx의 SSE 버퍼링을 꺼야 한다.** 켜져 있으면 알림이 뭉쳐서 오거나 아예 도달하지 않는다. 분산 단계에서 Nginx를 앞에 세우는 순간 걸리는 문제다.
+- **SockJS와 WebSocket 업그레이드**도 Nginx 설정에 걸린다. 프론트가 raw WebSocket이 아니라 SockJS를 쓰므로 폴백 트랜스포트(xhr-streaming 등)까지 통과해야 한다.

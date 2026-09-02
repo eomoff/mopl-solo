@@ -26,6 +26,8 @@ Label: `wayfinder:map`
 - `frontend/` — 제공 번들 원본과 zip. **git 미추적.**
 - `src/main/resources/static/` — 빌드된 프론트. Spring이 같은 오리진으로 서빙하므로 CORS 설정이 필요 없다.
 
+**용어집**: 저장소 루트 [`CONTEXT.md`](../../CONTEXT.md). 용어가 흔들리면 먼저 여기를 본다.
+
 **매 세션 참조 스킬**: `grilling`, `domain-modeling`. 모듈 경계·인터페이스를 다룰 땐 `codebase-design`.
 
 **트래커**: 로컬 마크다운. 이 디렉토리가 곧 트래커이며, **git으로 추적된다**(`origin`: https://github.com/eomoff/mopl-solo).
@@ -37,7 +39,8 @@ Label: `wayfinder:map`
 - [프론트엔드 계약 확보와 1.0.5 차이 확인](issues/01-frontend-contract.md): 계약 사본을 `contract/`에 커밋, 번들 원본은 `frontend/`(미추적), `dist/`는 `src/main/resources/static/`으로. **CORS·SPA 폴백 모두 불필요** — 프론트가 상대 경로를 쓰고 HashRouter라서. 경로 32 / 오퍼레이션 45 / 스키마 37. **`watchingsession`·`directmessage`에는 독립 쓰기 경로가 없고**, 소셜 로그인과 WebSocket/SSE 페이로드는 계약 밖이다.
 - [스포츠 콘텐츠를 목적지에 둘 것인가](issues/14-sports-scope.md): **(ㄴ) 무료 티어로 축소 포함.** 스포츠는 "타입이 여러 개인 콘텐츠 모델"이라는 설계 문제를 제공하는 선에서 존재하고, 배치의 학습 가치는 TMDB 규모에서 확보한다. 유료 구독 없음.
 - [GitHub 저장소 개설](issues/11-github-repo.md): **https://github.com/eomoff/mopl-solo** (public). 지도(`.scratch/`)를 **git으로 추적**하기로 하고 `.gitignore`에서 뺐다. `frontend/`·`.DS_Store` 무시 추가. `docs/`는 무시 유지 — `info.md`는 공개되지 않는다.
-- [분산 전환 이음매 확정](issues/04-distribution-seams.md): 시청 세션은 **처음부터 Redis**(전환 없음, Redis가 1일차 의존성). WebSocket 브로커는 **의도적으로 단일 인스턴스용으로 남겨** 거기서 전환을 겪는다. **브로커·SSE 전파는 하나의 이음매**로 통합. 이벤트 발행·파일 저장·캐시는 인터페이스 뒤, 배치 잠금은 전환 시점에. 되돌리는 비용이 가장 높은 것은 **이벤트 발행**.
+- [분산 전환 이음매 확정](issues/04-distribution-seams.md): 시청 세션은 **처음부터 Redis**(전환 없음, Redis가 1일차 의존성). WebSocket 브로커는 **의도적으로 단일 인스턴스용으로 남겨** 거기서 전환을 겪는다. **브로커·SSE 전파는 하나의 이음매**로 통합. 이벤트 발행·파일 저장·캐시는 인터페이스 뒤, 배치 잠금은 전환 시점에. 되돌리는 비용이 가장 높은 것은 **이벤트 발행**. **(2026-09-03 수정: 시청 세션 집계값은 DB 비정규화 컬럼으로)**
+- [도메인 모델 확정](issues/05-domain-model.md): PK는 UUID·시간은 `date-time`(계약이 고정). **정렬 축인 계산 필드만 저장**(`averageRating`·`watcherCount`·`subscriberCount`), 조회자별 값(`subscribedByMe`·`hasUnread`)은 파생. 타입별 속성은 **부속 테이블**, 태그는 별도 테이블. `auth`는 엔티티 없이 시작. 계약 결함 3건은 글자 그대로 따르되 **DTO 경계에서만 매핑**한다. 용어집은 [`CONTEXT.md`](../../CONTEXT.md).
 
 ## Not yet specified
 

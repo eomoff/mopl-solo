@@ -42,6 +42,7 @@ Label: `wayfinder:map`
 - [분산 전환 이음매 확정](issues/04-distribution-seams.md): 시청 세션은 **처음부터 Redis**(전환 없음, Redis가 1일차 의존성). WebSocket 브로커는 **의도적으로 단일 인스턴스용으로 남겨** 거기서 전환을 겪는다. **브로커·SSE 전파는 하나의 이음매**로 통합. 이벤트 발행·파일 저장·캐시는 인터페이스 뒤, 배치 잠금은 전환 시점에. 되돌리는 비용이 가장 높은 것은 **이벤트 발행**. **(2026-09-03 수정: 시청 세션 집계값은 DB 비정규화 컬럼으로)**
 - [도메인 모델 확정](issues/05-domain-model.md): PK는 UUID·시간은 `date-time`(계약이 고정). **정렬 축인 계산 필드만 저장**(`averageRating`·`watcherCount`·`subscriberCount`), 조회자별 값(`subscribedByMe`·`hasUnread`)은 파생. 타입별 속성은 **부속 테이블**, 태그는 별도 테이블. `auth`는 엔티티 없이 시작. 계약 결함 3건은 글자 그대로 따르되 **DTO 경계에서만 매핑**한다. 용어집은 [`CONTEXT.md`](../../CONTEXT.md).
 - [실시간 WebSocket 아키텍처 설계](issues/07-realtime.md): **STOMP + SockJS**(`/ws`), 인증은 `CONNECT` 프레임 헤더. **클라이언트가 JOIN/LEAVE를 발행하지 않으므로 서버가 구독 이벤트에서 파생**한다. 시청 세션은 사용자 기준 + 참조 카운트. **DM 두 경로는 중복이 아니라 상보적** — 서버는 둘 다 보낸다. 대화 토픽은 `ChannelInterceptor`로 참여자 인가 검사(없으면 남의 DM이 새어나간다). *(에이전트 판단으로 확정)*
+- [알림·이벤트 파이프라인 설계](issues/08-notification.md): **읽음 처리가 곧 삭제**이고 알림에 타겟 링크가 없다(순수 텍스트). **시청 알림을 만들지 않기로 해 트리거가 6종→5종**으로 줄었다(요구사항의 의도적 축소). 팬아웃은 쓰기 시점, 발행은 `DomainEventPublisher` 단일 진입점 + `AFTER_COMMIT`. `ERROR` level은 쓰지 않는다.
 
 ## Not yet specified
 

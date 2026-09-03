@@ -36,3 +36,16 @@
 - `ContentDto`에 `createdAt`이 없으나 `GET /api/contents`는 `sortBy=createdAt`을 받는다.
 - `ReviewDto`도 마찬가지다 (`sortBy=createdAt`).
 - `PlaylistDto`는 `updatedAt`만 노출한다.
+
+## 상태코드의 형태
+
+전수 확인 결과 계약이 쓰는 코드는 **400 / 401 / 403 / 404 / 500** 다섯 개뿐이다.
+
+- **409(Conflict)가 없다.** 중복(이메일 중복 가입, 중복 팔로우, 같은 콘텐츠 두 번 평점)은 **400**으로 응답한다.
+- **404는 5곳에서만 선언된다** — `reset-password`, `conversations/with`, `conversations/{id}`, `follows/followed-by-me`, `users/{userId}`. `GET /api/contents/{contentId}`·`GET /api/playlists/{playlistId}`에는 **없으므로 없는 리소스도 400**이다.
+- **403은 15곳에서만 선언된다** — 소유권·역할이 걸리는 곳뿐이다. 그 외에 403을 내보내면 계약 위반이다.
+- `GET /api/sse`는 **200만 선언**한다. `POST /api/auth/sign-out`에 401이 없다 — 이미 로그아웃 상태여도 성공 처리한다는 뜻이다.
+
+## 프론트엔드는 `ErrorResponse.message`를 표시하지 않는다
+
+모든 화면이 하드코딩된 한국어 문자열을 toast로 띄우며, 스토어 공통 경로는 `(error as Error).message`(Axios의 메시지)를 읽는다. 따라서 **`message`와 `details`는 개발자용**이다.

@@ -51,6 +51,7 @@ Label: `wayfinder:map`
 - [12주 마일스톤 구획](issues/13-milestones.md): **세로로 얇게 뚫고 넓힌다**(프론트가 있어 즉시 확인된다). **기능이 절반쯤일 때 첫 전환**(6주차 전파) — 늦추면 전환이 마지막 2주에 몰려 터진다. **AWS는 두 번 올리고 1차는 단일 인스턴스**다(실패 시 배포 문제와 분산 문제가 섞이지 않게). 3주차에 **스포츠 Job을 켠다**(켜둔 날수가 곧 데이터). 마지막 2주는 버퍼.
 - [예외·에러 응답 계약 확정](issues/17-error-contract.md): 계약이 쓰는 코드는 **400/401/403/404/500 다섯 개뿐이고 409가 없다** — 중복도 400, **404 미선언 조회의 없는 리소스도 400**(계약이 이긴다). **프론트는 서버 `message`를 한 번도 표시하지 않으므로** `message`·`details`는 개발자용으로 최적화한다. `exceptionName`에는 도메인 에러 코드. **401/403을 섞으면 무한 재발급 루프**가 되므로 `AuthenticationEntryPoint`로 미인증을 반드시 401로 만든다.
 - [AWS 배포 형상 확정](issues/18-aws-topology.md): **프라이빗 서브넷 + NAT**(퍼블릭엔 Nginx만), RDS는 **스냅샷 후 삭제·복원**, **Redis는 ECS 태스크**(담긴 것이 전부 휘발 가능하므로 ElastiCache 불필요 — `info.md`에서 의도적으로 벗어난 지점). ALB 없이 **Nginx가 앞에 서고 앱은 desired count 2**. 이미지 태그는 커밋 SHA. **teardown도 워크플로로 만든다** — 손으로 내리면 NAT Gateway를 빠뜨린다.
+- [외부 API 키 발급](issues/10-api-keys.md): TMDB **Read Access Token**을 `MOPL_TMDB_ACCESS_TOKEN`으로 주입(확보 완료). TheSportsDB는 공개 키 `123`이라 설정 불필요. **TMDB 귀속 표기가 의무**이고 SLA가 없다. 한국어 폴백의 실제 동작은 **1주차에 `curl` 한 줄로 확인해 [콘텐츠 수집 배치 설계]에 기록**한다.
 
 ## Not yet specified
 

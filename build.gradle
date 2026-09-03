@@ -79,19 +79,40 @@ dependencies {
 }
 
 tasks.named('test') {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        // 외부 API를 실제로 호출하는 테스트는 기본 실행에서 제외한다.
+        // 조사가 미확인으로 남긴 항목을 검증할 때만 -PincludeExternal 로 켠다.
+        if (!project.hasProperty('includeExternal')) {
+            excludeTags 'external'
+        }
+    }
     finalizedBy tasks.jacocoTestReport
 }
 
-tasks.named('jacocoTestReport') {
+// 커버리지 집계에서 제외할 것 — 로직이 없어 테스트할 대상이 아니다
+def coverageExcludes = [
+    '**/dto/**',
+    '**/config/**',
+    '**/MoplApplication.class'
+]
+
+tasks.withType(JacocoReportBase).configureEach {
     dependsOn tasks.test
+    classDirectories.setFrom(
+        files(sourceSets.main.output.classesDirs).asFileTree.matching {
+            exclude coverageExcludes
+        }
+    )
+}
+
+tasks.named('jacocoTestReport') {
     reports {
         xml.required = true
         html.required = true
     }
 }
 
-// 테스트 커버리지 80% 이상 유지 (./gradlew jacocoTestCoverageVerification)
+// 테스트 커버리지 80% 이상 유지
 tasks.named('jacocoTestCoverageVerification') {
     violationRules {
         rule {
@@ -102,4 +123,9 @@ tasks.named('jacocoTestCoverageVerification') {
             }
         }
     }
+}
+
+// 게이트를 check에 연결한다 — 연결하지 않으면 ./gradlew build 로는 돌지 않는다
+tasks.named('check') {
+    dependsOn tasks.jacocoTestCoverageVerification
 }

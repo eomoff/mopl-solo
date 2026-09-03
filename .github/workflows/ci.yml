@@ -1,0 +1,120 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# 같은 브랜치에 새 푸시가 오면 진행 중인 실행을 취소한다
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: 빌드 · 테스트 · 커버리지
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: JDK 21 설정
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      # Testcontainers는 ubuntu-latest에 기본 설치된 Docker를 그대로 쓴다.
+      # 외부 API를 호출하는 테스트는 @Tag("external")로 분리되어 기본 실행에서 빠진다.
+      # build 는 check 를 거치므로 커버리지 게이트(80%)까지 함께 돈다.
+      - name: 빌드 (테스트 + 커버리지 게이트)
+        run: ./gradlew build --stacktrace
+
+      - name: 테스트·커버리지 리포트 업로드
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: reports-${{ github.run_number }}
+          path: |
+            build/reports/tests/test
+            build/reports/jacoco/test/html
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: 커버리지 값 추출
+        id: coverage
+        if: always()
+        run: |
+          REPORT=build/reports/jacoco/test/jacocoTestReport.xml
+          if [ ! -f "$REPORT" ]; then
+            echo "리포트가 없어 건너뛴다: $REPORT"
+            exit 0
+          fi
+          PCT=$(python3 - "$REPORT" <<'PY'
+          import sys, xml.etree.ElementTree as ET
+
+          root = ET.parse(sys.argv[1]).getroot()
+          # 리포트 최상위의 LINE 카운터가 전체 집계다
+          for counter in root.findall('counter'):
+              if counter.get('type') == 'LINE':
+                  missed = int(counter.get('missed'))
+                  covered = int(counter.get('covered'))
+                  total = missed + covered
+                  print(f"{covered / total * 100:.1f}" if total else "0.0")
+                  break
+          else:
+              # 잴 대상이 아직 없다 (제외 규칙을 적용하면 남는 클래스가 없는 초기 상태)
+              print("0.0")
+          PY
+          )
+          echo "percent=$PCT" >> "$GITHUB_OUTPUT"
+          echo "라인 커버리지: ${PCT}%"
+          echo "### 라인 커버리지 ${PCT}%" >> "$GITHUB_STEP_SUMMARY"
+
+      # 배지는 main 에서만 갱신한다.
+      # GIST_TOKEN / GIST_ID 시크릿이 없으면 조용히 건너뛴다 — 시크릿을 넣기 전까지 CI 가 빨개지지 않는다.
+      - name: 커버리지 배지 갱신 (Gist)
+        if: github.ref == 'refs/heads/main' && success()
+        env:
+          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
+          GIST_ID: ${{ secrets.GIST_ID }}
+          PCT: ${{ steps.coverage.outputs.percent }}
+        run: |
+          if [ -z "$GIST_TOKEN" ] || [ -z "$GIST_ID" ] || [ -z "$PCT" ]; then
+            echo "GIST_TOKEN / GIST_ID 시크릿이 없어 배지 갱신을 건너뛴다."
+            exit 0
+          fi
+
+          if awk "BEGIN { exit !($PCT >= 80) }"; then
+            COLOR=brightgreen
+          elif awk "BEGIN { exit !($PCT >= 60) }"; then
+            COLOR=yellow
+          else
+            COLOR=red
+          fi
+
+          BODY=$(PCT="$PCT" COLOR="$COLOR" python3 - <<'PY'
+          import json, os
+
+          badge = {
+              "schemaVersion": 1,
+              "label": "coverage",
+              "message": f"{os.environ['PCT']}%",
+              "color": os.environ['COLOR'],
+          }
+          print(json.dumps({"files": {"mopl-solo-coverage.json": {"content": json.dumps(badge)}}}))
+          PY
+          )
+
+          curl -sS --fail-with-body -X PATCH \
+            -H "Authorization: Bearer $GIST_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/gists/$GIST_ID" \
+            -d "$BODY" > /dev/null
+
+          echo "배지 갱신 완료: ${PCT}% ($COLOR)"

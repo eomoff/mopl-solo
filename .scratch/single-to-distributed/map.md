@@ -50,6 +50,7 @@ Label: `wayfinder:map`
 - [브랜치 전략과 CI/CD 결정](issues/12-ci-cd.md): 기능 브랜치 + PR, **승인 요구 없이 필수 상태 검사만** (혼자인데 승인을 요구하면 매번 우회하게 된다). **이음매 전환마다 PR 하나** = 되돌릴 수 있는 단위. CI는 `./gradlew build` 하나로 시작해 전환 시점에 단일/분산 job으로 분리. 배지는 Gist + shields.io, 배포는 **`workflow_dispatch` 수동 + OIDC**(장기 키를 시크릿에 넣지 않는다). 80% 게이트는 처음부터 켜되 `dto`·`config`·`MoplApplication` 제외.
 - [12주 마일스톤 구획](issues/13-milestones.md): **세로로 얇게 뚫고 넓힌다**(프론트가 있어 즉시 확인된다). **기능이 절반쯤일 때 첫 전환**(6주차 전파) — 늦추면 전환이 마지막 2주에 몰려 터진다. **AWS는 두 번 올리고 1차는 단일 인스턴스**다(실패 시 배포 문제와 분산 문제가 섞이지 않게). 3주차에 **스포츠 Job을 켠다**(켜둔 날수가 곧 데이터). 마지막 2주는 버퍼.
 - [예외·에러 응답 계약 확정](issues/17-error-contract.md): 계약이 쓰는 코드는 **400/401/403/404/500 다섯 개뿐이고 409가 없다** — 중복도 400, **404 미선언 조회의 없는 리소스도 400**(계약이 이긴다). **프론트는 서버 `message`를 한 번도 표시하지 않으므로** `message`·`details`는 개발자용으로 최적화한다. `exceptionName`에는 도메인 에러 코드. **401/403을 섞으면 무한 재발급 루프**가 되므로 `AuthenticationEntryPoint`로 미인증을 반드시 401로 만든다.
+- [AWS 배포 형상 확정](issues/18-aws-topology.md): **프라이빗 서브넷 + NAT**(퍼블릭엔 Nginx만), RDS는 **스냅샷 후 삭제·복원**, **Redis는 ECS 태스크**(담긴 것이 전부 휘발 가능하므로 ElastiCache 불필요 — `info.md`에서 의도적으로 벗어난 지점). ALB 없이 **Nginx가 앞에 서고 앱은 desired count 2**. 이미지 태그는 커밋 SHA. **teardown도 워크플로로 만든다** — 손으로 내리면 NAT Gateway를 빠뜨린다.
 
 ## Not yet specified
 

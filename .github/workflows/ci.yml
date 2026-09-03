@@ -1,22 +1,25 @@
 name: CI
 
+# github Actions가 언제 실행될지 트리거 설정
 on:
   pull_request:
   push:
     branches: [main]
 
-# 같은 브랜치에 새 푸시가 오면 진행 중인 실행을 취소한다
+# 같은 브랜치에 새 푸시가 오면 진행 중인 실행을 취소함
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# 읽기 권한만 가능하도록 설정(CI 워크플로우는 테스트/빌드/커버리지 체크만 하고 쓰는행위를 할 필요가 없음)
 permissions:
   contents: read
 
+# 워크플로우 안에서 실행될 작업 단위 정
 jobs:
   build:
     name: 빌드 · 테스트 · 커버리지
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest      # 이 job을 실행할 가상머신 환경
     timeout-minutes: 30
 
     steps:
@@ -29,9 +32,9 @@ jobs:
           java-version: '21'
           cache: gradle
 
-      # Testcontainers는 ubuntu-latest에 기본 설치된 Docker를 그대로 쓴다.
-      # 외부 API를 호출하는 테스트는 @Tag("external")로 분리되어 기본 실행에서 빠진다.
-      # build 는 check 를 거치므로 커버리지 게이트(80%)까지 함께 돈다.
+      # Docker: ubuntu-latest 기본 설치 사용 (Testcontainers)
+      # 외부 API 호출 테스트: @Tag("external")로 분리, 기본 실행 제외
+      # build: check 포함 → 커버리지 게이트(80%) 함께 적용
       - name: 빌드 (테스트 + 커버리지 게이트)
         run: ./gradlew build --stacktrace
 
@@ -59,7 +62,7 @@ jobs:
           import sys, xml.etree.ElementTree as ET
 
           root = ET.parse(sys.argv[1]).getroot()
-          # 리포트 최상위의 LINE 카운터가 전체 집계다
+          # 리포트 최상위 LINE 카운터 = 전체 집계
           for counter in root.findall('counter'):
               if counter.get('type') == 'LINE':
                   missed = int(counter.get('missed'))
@@ -68,7 +71,7 @@ jobs:
                   print(f"{covered / total * 100:.1f}" if total else "0.0")
                   break
           else:
-              # 잴 대상이 아직 없다 (제외 규칙을 적용하면 남는 클래스가 없는 초기 상태)
+              # 잴 대상 없음 — 제외 규칙 적용 후 남는 클래스가 없는 초기 상태
               print("0.0")
           PY
           )
@@ -76,8 +79,8 @@ jobs:
           echo "라인 커버리지: ${PCT}%"
           echo "### 라인 커버리지 ${PCT}%" >> "$GITHUB_STEP_SUMMARY"
 
-      # 배지는 main 에서만 갱신한다.
-      # GIST_TOKEN / GIST_ID 시크릿이 없으면 조용히 건너뛴다 — 시크릿을 넣기 전까지 CI 가 빨개지지 않는다.
+      # 배지 갱신: main 전용
+      # GIST_TOKEN / GIST_ID 없으면 조용히 skip — 시크릿 등록 전까지 CI 실패 방지
       - name: 커버리지 배지 갱신 (Gist)
         if: github.ref == 'refs/heads/main' && success()
         env:

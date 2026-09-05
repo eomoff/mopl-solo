@@ -1,3 +1,8 @@
 spring:
   application:
     name: mopl
+
+  jpa:
+    hibernate:
+      # 스키마는 Flyway가 소유하고, JPA는 검증만 — 마이그레이션 누락 시 부팅 실패
+      ddl-auto: validate

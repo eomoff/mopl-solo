@@ -54,6 +54,7 @@ Label: `wayfinder:map`
 - [외부 API 키 발급](issues/10-api-keys.md): TMDB **Read Access Token**을 `MOPL_TMDB_ACCESS_TOKEN`으로 주입(확보 완료). TheSportsDB는 공개 키 `123`이라 설정 불필요. **TMDB 귀속 표기가 의무**이고 SLA가 없다. 한국어 폴백의 실제 동작은 **1주차에 `curl` 한 줄로 확인해 [콘텐츠 수집 배치 설계]에 기록**한다.
 - [캐시 전략 확정](issues/19-cache.md): 캐시는 성능이 아니라 **이음매로만 남는다** — 인메모리로 3주차에 넣고 10주차에 Redis로 전환한다. 계약이 required로 박은 **`watcherCount`가 설계를 정했다**(통째 캐시하면 evict가 실시간으로 터져 히트율 0) — 빼고 담고 조립 시점에 붙인다. 콘텐츠 **단건만**, **TTL 없이 evict만**, 캐시 전용 값 타입, evict는 평점 재계산 지점에(도메인 이벤트에 태우면 10주차에 두 이음매가 동시에 움직인다).
 - [어드민 계정 초기화 규칙](issues/21-admin-bootstrap.md): 이메일·이름은 설정, **비밀번호만 환경변수**(없으면 **기동 실패**). **없을 때만 만들고**, 경합은 `users(email)` unique에 맡긴다 — **이음매가 아니다**(전환할 것이 없다). **자기 자신의 `role`·`locked` 변경을 403으로 막아 어드민 0명을 구조적으로 불가능하게** 한다. "있으면 승격"은 **가입 한 번으로 관리자가 되는 권한 상승 취약점**이라 배제. Flyway를 들이지 않는다.
+- [스키마 관리 방식 확정](issues/22-schema-management.md): **Flyway를 1주차부터.** 4주차 첫 배포 전까지는 마이그레이션 파일을 고쳐 써도 되고 그 뒤로 append-only — **append-only 규율은 배포된 뒤에야 필요하다.** 테스트도 Flyway로 돌린다(**스키마도 인프라**, ddl-auto면 마이그레이션 오타를 CI가 못 잡는다) + `validate` 병행. Spring Batch 메타 테이블까지 Flyway가 소유. **forward-only**이고 파괴적 변경은 두 단계로 나눈다. `V1`에 전체를 넣지 않고 **주차마다 필요한 것만** — 마이그레이션이 마일스톤의 리듬을 갖는다.
 
 ## Not yet specified
 

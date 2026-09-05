@@ -36,7 +36,7 @@
 
 | 구분 | 사용 기술 |
 | --- | --- |
-| 언어·프레임워크 | Java 21, Spring Boot 4.1.1 |
+| 언어·프레임워크 | Java 21, Spring Boot 3.5.16 |
 | 영속성 | PostgreSQL, Spring Data JPA |
 | 인증 | Spring Security, JWT (jjwt), OAuth2 (Google, Kakao) |
 | 실시간 | WebSocket (STOMP + SockJS), SSE |

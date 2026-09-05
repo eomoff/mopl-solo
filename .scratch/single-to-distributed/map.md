@@ -10,7 +10,7 @@ Label: `wayfinder:map`
 
 ## Notes
 
-**도메인**: 영화·드라마·스포츠 콘텐츠를 큐레이팅·평가하고, 같은 콘텐츠를 보는 사람끼리 실시간으로 어울리는 소셜 서비스. Spring Boot 4.1.1 / Java 21 / PostgreSQL + JPA / Redis / Kafka.
+**도메인**: 영화·드라마·스포츠 콘텐츠를 큐레이팅·평가하고, 같은 콘텐츠를 보는 사람끼리 실시간으로 어울리는 소셜 서비스. Spring Boot 3.5.16 / Java 21 / PostgreSQL + JPA / Redis / Kafka.
 
 **상시 제약**
 

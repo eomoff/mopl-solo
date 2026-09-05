@@ -3,7 +3,7 @@ package com.github.eomoff.mopl;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
-import org.testcontainers.postgresql.PostgreSQLContainer;
+import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
  * 테스트용 인프라.
@@ -19,7 +19,7 @@ class TestcontainersConfiguration {
 
   @Bean
   @ServiceConnection
-  PostgreSQLContainer postgresContainer() {
-    return new PostgreSQLContainer("postgres:17-alpine");
+  PostgreSQLContainer<?> postgresContainer() {
+    return new PostgreSQLContainer<>("postgres:17-alpine");
   }
 }

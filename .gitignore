@@ -41,6 +41,7 @@ docs/
 
 ### LLM ###
 .CLAUDE
+CLAUDE.md
 
 ### 제공된 프론트엔드 원본 (계약 사본은 contract/에 커밋) ###
 /frontend/

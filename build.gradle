@@ -80,8 +80,8 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform {
-        // 외부 API를 실제로 호출하는 테스트는 기본 실행에서 제외한다.
-        // 조사가 미확인으로 남긴 항목을 검증할 때만 -PincludeExternal 로 켠다.
+        // 외부 API 실제 호출 테스트: 기본 실행에서 제외
+        // 조사가 미확인으로 남긴 항목 검증 시에만 -PincludeExternal 로 활성화
         if (!project.hasProperty('includeExternal')) {
             excludeTags 'external'
         }
@@ -89,7 +89,7 @@ tasks.named('test') {
     finalizedBy tasks.jacocoTestReport
 }
 
-// 커버리지 집계에서 제외할 것 — 로직이 없어 테스트할 대상이 아니다
+// 커버리지 집계 제외 대상 — 로직이 없어 테스트 대상 아님
 def coverageExcludes = [
     '**/dto/**',
     '**/config/**',
@@ -125,7 +125,7 @@ tasks.named('jacocoTestCoverageVerification') {
     }
 }
 
-// 게이트를 check에 연결한다 — 연결하지 않으면 ./gradlew build 로는 돌지 않는다
+// 게이트를 check에 연결 — 미연결 시 ./gradlew build 로 실행되지 않음
 tasks.named('check') {
     dependsOn tasks.jacocoTestCoverageVerification
 }
